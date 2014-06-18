@@ -23,9 +23,19 @@ class Main
 		//--------------------------------------------------------------//
 		var argarr:Array<CmdArg> = [];
 		
-		//argarr.push(new CmdArgBool());
+		var test_bool:CmdArgBool = new CmdArgBool(
+			"b",
+			"Boolean",
+			"Simple boolean arg"
+			);
+		//trace(test_bool);
+		argarr.push(test_bool);
 		
-		//var testCmd:CmdLine = new CmdLine("Test");
+		var testCmd:CmdLine = new CmdLine("Test", argarr);
+		
+		//testCmd.usage();
+		testCmd.parse(2, ["-Boolean"]);
+		trace("Done parsing, if no other messages were shown then all went smooth.");
 		//--------------------------------------------------------------//
 	}
 	

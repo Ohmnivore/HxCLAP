@@ -34,108 +34,164 @@ class CmdArg
 	
 	private function setValueName(S:String):Void
 	{
-		
+		_valueName = S;
 	}
 	
 	private function setDescription(S:String):Void
 	{
-		
+		_description = S;
 	}
 	
-	public function new(Char1:String, Char2:String, Char3:String, Char4:String, Int1:Int = (E_CmdArgSyntax.isREQ | E_CmdArgSyntax.isVALREQ)) 
+	public function new(optChar:String, keyword:String, valueName:String, description:String,
+		syntaxFlags:Int = (E_CmdArgSyntax.isREQ | E_CmdArgSyntax.isVALREQ)) 
 	{
+		_optChar = optChar;
+		_keyword = keyword;
+		_valueName = valueName;
+		_description = description;
+		_syntaxFlags = syntaxFlags;
+		_status = E_CmdArgStatus.isBAD;
 		
+		validate_flags();
 	}
 	
 	// selectors
 	public function getOptChar():String
 	{
-		return "";
+		return _optChar;
 	}
 	
 	public function getKeyword():String
 	{
-		return "";
+		return _keyword;
 	}
 	
 	public function getValueName():String
 	{
-		return "";
+		return _valueName;
 	}
 	
 	public function getDescription():String
 	{
-		return "";
+		return _description;
 	}
 	
 	public function getSyntaxFlags():Int
 	{
-		return 0;
+		return _syntaxFlags;
 	}
 	
 	public function isHidden():Bool
 	{
-		return true;
+		//return (_syntaxFlags & E_CmdArgSyntax.isHIDDEN);
+		if (_syntaxFlags & E_CmdArgSyntax.isHIDDEN > 0)
+			return true;
+		
+		return false;
 	}
 	
 	public function isOpt():Bool
 	{
-		return true;
+		//return (_syntaxFlags & E_CmdArgSyntax.isOPT);
+		if (_syntaxFlags & E_CmdArgSyntax.isOPT > 0)
+			return true;
+		
+		return false;
 	}
 	
 	public function isValOpt():Bool
 	{
-		return true;
+		//return (_syntaxFlags & E_CmdArgSyntax.isVALOPT);
+		if (_syntaxFlags & E_CmdArgSyntax.isVALOPT > 0)
+			return true;
+		
+		return false;
 	}
 	
 	public function isBad():Bool
 	{
-		return true;
+		//return _status;
+		if (_status > 0)
+			return true;
+		
+		return false;
 	}
 	
 	public function setFound():Void
 	{
-		
+		_status |= E_CmdArgStatus.isFOUND;
+		//trace((_syntaxFlags & E_CmdArgStatus.isFOUND), E_CmdArgStatus.isFOUND, ((0x00 | 0x02) & 0x02));
 	}
 	
 	public function isFound():Bool
 	{
-		return true;
+		//return (_status & E_CmdArgStatus.isFOUND);
+		//trace((_syntaxFlags & E_CmdArgStatus.isFOUND));
+		if (_status & E_CmdArgStatus.isFOUND > 0)
+			return true;
+		
+		return false;
 	}
 	
 	public function setValFound():Void
 	{
-		
+		_status |= E_CmdArgStatus.isVALFOUND;
 	}
 	
 	public function isValFound():Bool
 	{
-		return true;
+		//return (_status & E_CmdArgStatus.isVALFOUND);
+		if ((_status & E_CmdArgStatus.isVALFOUND) > 0)
+			return true;
+		
+		return false;
 	}
 	
 	public function setParseOK():Void
 	{
-		
+		_status |= E_CmdArgStatus.isPARSEOK;
 	}
 	
 	public function isParseOK():Bool
 	{
-		return true;
+		//return (_status & E_CmdArgStatus.isPARSEOK);
+		if (_status & E_CmdArgStatus.isPARSEOK > 0)
+			return true;
+		
+		return false;
 	}
 	
 	// methods
 	public function isNull():Bool
 	{
-		return true;
+		return !isParseOK();
 	}
 	
-	public function getValue(Int1:Int, Int2:Int, Char1:Array<String>):Bool
+	public function getValue(i:Int, argc:Int, argv:Array<String>):Bool
 	{
 		return true;
 	}
 	
 	public function validate_flags():Bool
 	{
+		if ((_syntaxFlags & E_CmdArgSyntax.isOPT > 0) && (_syntaxFlags & E_CmdArgSyntax.isREQ > 0))
+		{
+			trace("Warning: keyword " + getKeyword() + " can't be optional AND required\n");
+			trace(" changing the syntax of " + getKeyword() + " to be required.\n");
+			
+			_syntaxFlags &= ~E_CmdArgSyntax.isOPT;
+			return false;
+		}
+		
+		if ((_syntaxFlags & E_CmdArgSyntax.isVALOPT > 0) && (_syntaxFlags & E_CmdArgSyntax.isVALREQ > 0))
+		{
+		   trace("Warning: value for keyword " + getKeyword() + " can't be optional AND required\n");
+		   trace("changing the syntax for the value of " + getKeyword() + " to be required.\n");
+		   
+			_syntaxFlags &= ~E_CmdArgSyntax.isVALREQ;
+			return false;
+		}
+		
 		return true;
 	}
 }
@@ -145,15 +201,42 @@ class CmdArgInt extends CmdArg
 {
 	public var _v:Float;
 	
-	public function new(Char1:String, Char2:String, Char3:String, Char4:String,
-		Int1:Int = (E_CmdArgSyntax.isREQ | E_CmdArgSyntax.isVALREQ), Int2:Int = 0)
+	public function new(optChar:String, keyword:String, valueName:String, description:String,
+		syntaxFlags:Int = (E_CmdArgSyntax.isREQ | E_CmdArgSyntax.isVALREQ), def:Int = 0)
 	{
-		super(Char1, Char2, Char3, Char4, Int1);
+		super(optChar, keyword, valueName, description, syntaxFlags);
+		
+		_v = def;
 	}
 	
-	override public function getValue(Int1:Int, Int2:Int, Char1:Array<String>):Bool
+	override public function getValue(i:Int, argc:Int, argv:Array<String>):Bool
 	{
-		return true;
+		var ptr:String;
+		i++;
+		
+		if (i < argc)
+		{
+			var arg:String = argv[i];
+			
+			try
+			{
+				_v = Std.parseInt(arg);
+			}
+			
+			catch (e:Dynamic)
+			{
+				trace(" invalid integer value \\" + arg + "\\");
+				return false;
+			}
+			
+			setParseOK();
+			return true;
+		}
+		
+		else
+		{
+			return false;
+		}
 	}
 	//operator int();
 	//friend ostream& operator<<(ostream&, const CmdArgInt&);
@@ -164,15 +247,42 @@ class CmdArgFloat extends CmdArg
 {
 	public var _v:Float;
 	
-	public function new(Char1:String, Char2:String, Char3:String, Char4:String,
-		Int1:Int = (E_CmdArgSyntax.isREQ | E_CmdArgSyntax.isVALREQ), Double1:Float = 0)
+	public function new(optChar:String, keyword:String, valueName:String, description:String,
+		syntaxFlags:Int = (E_CmdArgSyntax.isREQ | E_CmdArgSyntax.isVALREQ), def:Float = 0)
 	{
-		super(Char1, Char2, Char3, Char4, Int1);
+		super(optChar, keyword, valueName, description, syntaxFlags);
+		
+		_v = def;
 	}
 	
-	override public function getValue(Int1:Int, Int2:Int, Char1:Array<String>):Bool
+	override public function getValue(i:Int, argc:Int, argv:Array<String>):Bool
 	{
-		return true;
+		var ptr:String;
+		i++;
+		
+		if (i < argc)
+		{
+			var arg:String = argv[i];
+			
+			try
+			{
+				_v = Std.parseFloat(arg);
+			}
+			
+			catch (e:Dynamic)
+			{
+				trace(" invalid integer value \\" + arg + "\\");
+				return false;
+			}
+			
+			setParseOK();
+			return true;
+		}
+		
+		else
+		{
+			return false;
+		}
 	}
 	//operator float();
     //friend ostream& operator<<(ostream&, const CmdArgFloat&);
@@ -183,13 +293,17 @@ class CmdArgBool extends CmdArg
 {
 	public var _v:Bool;
 	
-	public function new(Char1:String, Char2:String, Char3:String, Int1:Int = (E_CmdArgSyntax.isREQ | E_CmdArgSyntax.isVALREQ))
+	public function new(optChar:String, keyword:String, description:String, syntaxFlags:Int = (E_CmdArgSyntax.isREQ | E_CmdArgSyntax.isVALREQ))
 	{
-		super(Char1, Char2, Char3, Char3, Int1);
+		super(optChar, keyword, "", description, syntaxFlags);
+		
+		_v = false;
 	}
 	
-	override public function getValue(Int1:Int, Int2:Int, Char1:Array<String>):Bool
+	override public function getValue(i:Int, argc:Int, argv:Array<String>):Bool
 	{
+		_v = true;
+		setParseOK();
 		return true;
 	}
 	//operator bool();
@@ -201,14 +315,30 @@ class CmdArgStr extends CmdArg
 {
 	public var _v:String;
 	
-	public function new(Char1:String, Char2:String, Char3:String, Char4:String, Int1:Int = (E_CmdArgSyntax.isREQ | E_CmdArgSyntax.isVALREQ))
+	public function new(optChar:String, keyword:String, valueName:String, description:String,
+		syntaxFlags:Int = (E_CmdArgSyntax.isREQ | E_CmdArgSyntax.isVALREQ), def:String)
 	{
-		super(Char1, Char2, Char3, Char4, Int1);
+		super(optChar, keyword, valueName, description, syntaxFlags);
+		
+		_v = def;
 	}
 	
-	override public function getValue(Int1:Int, Int2:Int, Char1:Array<String>):Bool
+	override public function getValue(i:Int, argc:Int, argv:Array<String>):Bool
 	{
-		return true;
+		i++;
+		
+		if (i < argc)
+		{
+			var arg:String = argv[i];
+			
+			if (arg.charAt(0) == "-") return false;
+			_v = arg;
+			setParseOK();
+			return true;
+		}
+		
+		else
+			return false;
 	}
 	//operator char*();
 	//friend ostream& operator<<(ostream&, const CmdArgStr&);
@@ -219,15 +349,35 @@ class CmdArgChar extends CmdArg
 {
 	public var _v:String;
 	
-	public function new(Char1:String, Char2:String, Char3:String, Char4:String,
-		Int1:Int = (E_CmdArgSyntax.isREQ | E_CmdArgSyntax.isVALREQ), Char5:String = "\\0")
+	public function new(optChar:String, keyword:String, valueName:String, description:String,
+		syntaxFlags:Int = (E_CmdArgSyntax.isREQ | E_CmdArgSyntax.isVALREQ), def:String)
 	{
-		super(Char1, Char2, Char3, Char4, Int1);
+		super(optChar, keyword, valueName, description, syntaxFlags);
+		
+		_v = def;
 	}
 	
-	override public function getValue(Int1:Int, Int2:Int, Char1:Array<String>):Bool
+	override public function getValue(i:Int, argc:Int, argv:Array<String>):Bool
 	{
-		return true;
+		i++;
+		
+		if (i < argc)
+		{
+			var arg:String = argv[i];
+			
+			if (arg.length > 1)
+			{
+				trace("value \\" + arg + "\\ is too long. ignoring\n");
+				return false;
+			}
+			
+			_v = arg.charAt(0);
+			setParseOK();
+			return true;
+		}
+		
+		else
+			return false;
 	}
 	//operator char();
 	//friend ostream& operator<<(ostream&, const CmdArgChar&);
@@ -293,7 +443,7 @@ class CmdArgTypeList<T> extends CmdArg
 		return _min;
 	}
 	
-	override public function getValue(Int1:Int, Int2:Int, Char1:Array<String>):Bool
+	override public function getValue(i:Int, argc:Int, argv:Array<String>):Bool
 	{
 		return true;
 	}

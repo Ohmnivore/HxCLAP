@@ -14,6 +14,7 @@ class CmdLine
 	{
 		_progName = progName;
 		_maxLength = 0;
+		_cmdList = [];
 		
 		for (cmd in cmds)
 		{
@@ -107,6 +108,8 @@ class CmdLine
 					
 					found = true;
 				}
+				
+				i2++;
 			}
 			
 			if (!found)
