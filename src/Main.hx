@@ -23,19 +23,115 @@ class Main
 		//--------------------------------------------------------------//
 		var argarr:Array<CmdArg> = [];
 		
+		//Simple flags
 		var test_bool:CmdArgBool = new CmdArgBool(
 			"b",
-			"Boolean",
-			"Simple boolean arg"
+			"Bool",
+			"tests CmdArgBool class"
 			);
-		//trace(test_bool);
 		argarr.push(test_bool);
+		
+		var test_int:CmdArgInt = new CmdArgInt(
+			"i",
+			"Int",
+			"valueName",
+			"tests CmdArgInt class"
+			);
+		argarr.push(test_int);
+		
+		var test_float:CmdArgFloat = new CmdArgFloat(
+			"f",
+			"float",
+			"Float",
+			"tests CmdArgFloat class"
+			);
+		argarr.push(test_float);
+		
+		var test_string:CmdArgStr = new CmdArgStr(
+			"s",
+			"string",
+			"String",
+			"tests CmdArgStr class",
+			(E_CmdArgSyntax.isREQ | E_CmdArgSyntax.isVALREQ),
+			"default"
+			);
+		argarr.push(test_string);
+		
+		var test_char:CmdArgChar = new CmdArgChar(
+			"c",
+			"char",
+			"Character",
+			"tests CmdArgChar class",
+			(E_CmdArgSyntax.isREQ | E_CmdArgSyntax.isVALREQ),
+			"d"
+			);
+		argarr.push(test_char);
+		
+		//List flags
+		var test_list_int:CmdArgIntList = new CmdArgIntList(
+			"I",
+			"list-int",
+			"List of ints",
+			"tests CmdArgIntList class"
+			);
+		argarr.push(test_list_int);
+		
+		var test_list_float:CmdArgFloatList = new CmdArgFloatList(
+			"F",
+			"list-float",
+			"List of floats",
+			"tests CmdArgFloatList class"
+			);
+		argarr.push(test_list_float);
+		
+		var test_list_string:CmdArgStrList = new CmdArgStrList(
+			"S",
+			"list-string",
+			"List of strings",
+			"tests CmdArgStrList class"
+			);
+		argarr.push(test_list_string);
+		
+		var test_list_char:CmdArgCharList = new CmdArgCharList(
+			"C",
+			"list-char",
+			"List of characters",
+			"tests CmdArgCharList class"
+			);
+		argarr.push(test_list_char);
 		
 		var testCmd:CmdLine = new CmdLine("Test", argarr);
 		
 		//testCmd.usage();
-		testCmd.parse(2, ["-Boolean"]);
-		trace("Done parsing, if no other messages were shown then all went smooth.");
+		var parseArr:Array<String> = [
+			"-bool",
+			"-int", "1234",
+			"-float", "3.1416",
+			"-string", "Mmmmmmy generation...",
+			"-char", "C",
+			"-list-int", "2, 3, 4 , 5 , 6 , 7",
+			"-list-float", "11.34, 3.01245",
+			"-S", "Come, on, baby, light, my, fire", //same as -list-string
+			"-C", "H, E, L, L, O"  //same as -list-char
+			];
+		testCmd.parse(parseArr.length, parseArr);
+		trace("***Done parsing, if no other previous messages were shown then all went smooth.");
+		trace("");
+		trace("***Now, parse results are shown for following args: " + parseArr);
+		
+		trace(test_bool, test_bool._v);
+		trace(test_int, test_int._v);
+		trace(test_float, test_float._v);
+		trace(test_string, test_string._v);
+		trace(test_char, test_char._v);
+		trace(test_list_int, test_list_int._list);
+		trace(test_list_float, test_list_float._list);
+		trace(test_list_string, test_list_string._list);
+		trace(test_list_char, test_list_char._list);
+		
+		trace("");
+		trace("***Now tracing usage: ");
+		testCmd.usage();
 		//--------------------------------------------------------------//
 	}
 	

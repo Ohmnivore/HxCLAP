@@ -1,9 +1,12 @@
 package hxclap;
 
+import hxclap.CmdArg.CmdArgBool;
+
 /**
  * ...
  * @author Ohmnivore
  */
+
 class CmdLine
 {
 	public var _cmdList:Array<CmdArg>;
@@ -104,6 +107,9 @@ class CmdLine
 					else
 					{
 						cmd.setValFound();
+						
+						if (!Std.is(cmd, CmdArgBool))
+							i++;
 					}
 					
 					found = true;

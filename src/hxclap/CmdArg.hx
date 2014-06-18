@@ -403,6 +403,7 @@ class CmdArgTypeList<T> extends CmdArg
 		_delimiters = delim;
 		_min = minSize;
 		_max = maxSize;
+		_list = [];
 		
 		var buf:String = "";
 		buf = getValueName();
@@ -425,6 +426,8 @@ class CmdArgTypeList<T> extends CmdArg
 				//[TODO]Gotta throw an exception
 				trace("ERROR: space can't be a delimiter");
 			}
+			
+			i++;
 		}
 	}
 	
@@ -520,13 +523,40 @@ class CmdArgIntList extends CmdArgTypeList<Int>
 		super(optChar, keyword, valueName, description, syntaxFlags, minSize, maxSize, delim);
 	}
 	
-	override public function getValue(Int1:Int, Int2:Int, Char1:Array<String>):Bool
+	override public function getValue(i:Int, argc:Int, argv:Array<String>):Bool
 	{
-		return true;
+		i++;
+		
+		if (i < argc)
+		{
+			var tokens:String = argv[i];
+			
+			var tokens_arr:Array<String> = tokens.split(_delimiters.charAt(0));
+			
+			for (v in tokens_arr)
+			{
+				var value:Dynamic = Std.parseInt(v);
+				
+				if (value != null)
+				{
+					insert(value);
+				}
+				else
+				{
+					trace("invalid integer value \\" + v + "\\\n");
+					return false;
+				}
+			}
+			
+			return validate();
+		}
+		
+		else
+			return false;
 	}
 }
 
-//Definition of class CmdArgIntList
+//Definition of class CmdArgFloatList
 class CmdArgFloatList extends CmdArgTypeList<Float>
 {
 	public function new(optChar:String, keyword:String, valueName:String, description:String,
@@ -536,9 +566,36 @@ class CmdArgFloatList extends CmdArgTypeList<Float>
 		super(optChar, keyword, valueName, description, syntaxFlags, minSize, maxSize, delim);
 	}
 	
-	override public function getValue(Int1:Int, Int2:Int, Char1:Array<String>):Bool
+	override public function getValue(i:Int, argc:Int, argv:Array<String>):Bool
 	{
-		return true;
+		i++;
+		
+		if (i < argc)
+		{
+			var tokens:String = argv[i];
+			
+			var tokens_arr:Array<String> = tokens.split(_delimiters.charAt(0));
+			
+			for (v in tokens_arr)
+			{
+				var value:Dynamic = Std.parseFloat(v);
+				
+				if (value != null)
+				{
+					insert(value);
+				}
+				else
+				{
+					trace("invalid float value \\" + v + "\\\n");
+					return false;
+				}
+			}
+			
+			return validate();
+		}
+		
+		else
+			return false;
 	}
 }
 
@@ -552,9 +609,26 @@ class CmdArgStrList extends CmdArgTypeList<String>
 		super(optChar, keyword, valueName, description, syntaxFlags, minSize, maxSize, delim);
 	}
 	
-	override public function getValue(Int1:Int, Int2:Int, Char1:Array<String>):Bool
+	override public function getValue(i:Int, argc:Int, argv:Array<String>):Bool
 	{
-		return true;
+		i++;
+		
+		if (i < argc)
+		{
+			var tokens:String = argv[i];
+			
+			var tokens_arr:Array<String> = tokens.split(_delimiters.charAt(0));
+			
+			for (v in tokens_arr)
+			{
+				insert(v);
+			}
+			
+			return validate();
+		}
+		
+		else
+			return false;
 	}
 }
 
@@ -568,8 +642,34 @@ class CmdArgCharList extends CmdArgTypeList<String>
 		super(optChar, keyword, valueName, description, syntaxFlags, minSize, maxSize, delim);
 	}
 	
-	override public function getValue(Int1:Int, Int2:Int, Char1:Array<String>):Bool
+	override public function getValue(i:Int, argc:Int, argv:Array<String>):Bool
 	{
-		return true;
+		i++;
+		
+		if (i < argc)
+		{
+			var tokens:String = argv[i];
+			
+			var tokens_arr:Array<String> = tokens.split(_delimiters.charAt(0));
+			
+			for (v in tokens_arr)
+			{
+				v = StringTools.trim(v);
+				
+				if (v.length == 1)
+				{
+					insert(v);
+				}
+				else
+				{
+					trace("invalid char value \"" + v + "\"\n");
+				}
+			}
+			
+			return validate();
+		}
+		
+		else
+			return false;
 	}
 }
