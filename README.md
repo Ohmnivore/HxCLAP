@@ -7,7 +7,6 @@ For usage, the best thing would be to check out the docs at the CLAP website, th
 
 ### Quick example:
 `var test_bool:CmdArgBool = new CmdArgBool(
-
 			"b",
 			
 			"bool",
@@ -15,7 +14,6 @@ For usage, the best thing would be to check out the docs at the CLAP website, th
 			"Simple boolean flag",
 			
 			(E_CmdArgSyntax.isOPT) //Flag is set to optional
-			
 			);
 			
 var testCmd:CmdLine = new CmdLine("Test", [test_bool]);
