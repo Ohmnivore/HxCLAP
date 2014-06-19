@@ -8,18 +8,12 @@ For usage, the best thing would be to check out the docs at the CLAP website, th
 ### Quick example:
 `var test_bool:CmdArgBool = new CmdArgBool(
 			"b",
-			
 			"bool",
-			
 			"Simple boolean flag",
-			
 			(E_CmdArgSyntax.isOPT) //Flag is set to optional
 			);
-			
 var testCmd:CmdLine = new CmdLine("Test", [test_bool]);
-
 testCmd.parse(1, ["-b"]);
-
 trace(test_bool._v); //traces true`
 
 This example was really basic, HxCLAP can power an application that requires much more advanced parsing.
