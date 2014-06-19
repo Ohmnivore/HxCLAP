@@ -6,7 +6,7 @@ My goal with this port is to create a cross-platform solution that isn't exclusi
 For usage, the best thing would be to check out the docs at the CLAP website, the API is exactly the same.
 
 ### Quick example:
-var test_bool:CmdArgBool = new CmdArgBool(
+`var test_bool:CmdArgBool = new CmdArgBool(
 
 			"b",
 			
@@ -22,7 +22,7 @@ var testCmd:CmdLine = new CmdLine("Test", [test_bool]);
 
 testCmd.parse(1, ["-b"]);
 
-trace(test_bool._v); //traces true
+trace(test_bool._v); //traces true`
 
 This example was really basic, HxCLAP can power an application that requires much more advanced parsing.
 
