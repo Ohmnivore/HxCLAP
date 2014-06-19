@@ -18,19 +18,38 @@ import hxclap.CmdArg.CmdArgCharList;
  * @author Ohmnivore
  */
 
+ /**
+ * The core
+ */
 class CmdLine
 {
-	public var _cmdList:Array<CmdArg>;
-	public var _progName:String;
-	public var _maxLength:Int;
+	private var _cmdList:Array<CmdArg>;
+	private var _progName:String;
+	private var _maxLength:Int;
 	
 	//Callbacks
+	/**
+	 * Called when the parser can't find the specified flag
+	 */
 	public var switchNotFound:String->Void;
+	/**
+	 * Called when a required flag wasn't passed to the parser
+	 */
 	public var missingRequiredSwitch:CmdArg->Void;
 	
+	/**
+	 * Called when a flag's argument couldn't be parsed
+	 */
 	public var argNotFound:CmdArg->Void;
+	/**
+	 * Called when a flag doesn't receive its required argument
+	 */
 	public var missingRequiredArg:CmdArg->Void;
 	
+	/**
+	 * @param ProgName	The program's name - typically the application's name
+	 * @param cmds		Flags available for this application
+	 */
 	public function new(progName:String, cmds:Array<CmdArg>) 
 	{
 		_progName = progName;
@@ -46,6 +65,9 @@ class CmdLine
 		}
 	}
 	
+	/**
+	 * Traces this function's usage using default trace()
+	 */
 	public function defaultTraceUsage():Void
 	{
 		var u:UsageInfo = usage();
@@ -103,7 +125,7 @@ class CmdLine
 		trace('-$longName (-$shortName) -> $description -> expects: $expects');
 	}
 	
-	public function setUpDefaultCallbacks():Void
+	private function setUpDefaultCallbacks():Void
 	{
 		switchNotFound = HandleSwitchNotFound;
 		missingRequiredSwitch = HandleMissingSwitch;
@@ -132,20 +154,10 @@ class CmdLine
 		trace("Error: the switch -" + Cmd.getKeyword() + " must take a value");
 	}
 	
-	//public function HandleParseError(E:Int, Cmd:CmdArg, T:Int):Void
-	//{
-		//if (E == ArgError.OPT_CONFLICT_REQUIRED)
-		//{
-			//trace("Warning: keyword " + Cmd.getKeyword() + " can't be optional AND required");
-			//trace(" changing the syntax of " + Cmd.getKeyword() + " to be required.");
-		//}
-		//
-		//if (E == ArgError.INVALID_ARG)
-		//{
-			//
-		//}
-	//}
-	
+	/**
+	 * Returns this program's arguments and name in a UsageInfo object.
+	 * Iterate of that object's args array to retrieve useful info
+	 */
 	public function usage():UsageInfo
 	{
 		var u:UsageInfo = new UsageInfo(_progName);
@@ -161,6 +173,11 @@ class CmdLine
 		return u;
 	}
 	
+	/**
+	 * This is probably the most essential function.
+	 * @param argc		Amount of arguments you wish to pass to the parser
+	 * @param argv		List of arguments to parse, ex: ["-test-arg", "1", "-B"]
+	 */
 	public function parse(argc:Int, argv:Array<String>):Void
 	{
 		var cmd:CmdArg;
@@ -188,7 +205,7 @@ class CmdLine
 					
 					if (!cmd.getValue(i, argc, argv))
 					{
-						if (argNotFound != null)
+						if (argNotFound != null && !cmd.isValOpt())
 						{
 							argNotFound(cmd);
 						}
@@ -247,7 +264,13 @@ class CmdLine
 
 class UsageInfo
 {
+	/**
+	 * Program's name as passed when the CmdLine object was constructed
+	 */
 	public var name:String;
+	/**
+	 * List of all CmdArgs added to the CmdLine object that don't have the HIDDEN flag set to true
+	 */
 	public var args:Array<ArgInfo>;
 	
 	public function new(Name:String)
@@ -259,17 +282,50 @@ class UsageInfo
 
 class ArgInfo
 {
+	/**
+	 * ex: test-arg
+	 */
 	public var longName:String;
+	/**
+	 * ex: t
+	 */
 	public var shortName:String;
+	
 	public var description:String;
+	/**
+	 * Describes what sort of argument is expected for this switch
+	 */
 	public var expects:String;
+	/**
+	 * Minimum amount of arguments to be passed for this switch.
+	 * Only applies to list command arguments.
+	 */
 	public var min:Int = 0;
+	/**
+	 * Maximum amount of arguments to be passed for this switch.
+	 * Only applies to list command arguments.
+	 */
 	public var max:Int = 100;
+	/**
+	 * The type of this argument, as defined in ArgType
+	 */
 	public var type:Int;
 	
+	/**
+	 * Whether this argument is optional
+	 */
 	public var isOPT:Bool = false;
+	/**
+	 * Wether this argument is required
+	 */
 	public var isREQ:Bool = false;
+	/**
+	 * Wether an argument for this switch is optional
+	 */
 	public var isVALOPT:Bool = false;
+	/**
+	 * Wether an argument is required for this switch
+	 */
 	public var isVALREQ:Bool = false;
 	
 	public function new(Arg:CmdArg)

@@ -134,6 +134,96 @@ class Main
 		trace("***Now tracing usage: ");
 		testCmd.defaultTraceUsage();
 		//--------------------------------------------------------------//
+		
+		trace("***Warning should be thrown about bool:");
+		//Simple flags
+		var test_bool2:CmdArgBool = new CmdArgBool(
+			"b",
+			"bool",
+			"tests CmdArgBool class",
+			(E_CmdArgSyntax.isOPT | E_CmdArgSyntax.isREQ) //Deliberate flag conflict
+			);
+		
+		trace("***Warning should be thrown about int:");
+		var test_int2:CmdArgInt = new CmdArgInt(
+			"i",
+			"int",
+			"Int",
+			"tests CmdArgInt class",
+			(E_CmdArgSyntax.isVALOPT | E_CmdArgSyntax.isVALREQ) //Deliberate flag conflict
+			);
+		
+		trace("***Error should be thrown about float:");
+		var test_float2:CmdArgFloat = new CmdArgFloat(
+			"f",
+			"float",
+			"Float",
+			"tests CmdArgFloat class",
+			(E_CmdArgSyntax.isREQ)
+			);
+		var cmdline2:CmdLine = new CmdLine("cmdline2", [test_float2]);
+		cmdline2.parse(1, []);
+		
+		trace("***Error should not be thrown about string:");
+		var test_string2:CmdArgStr = new CmdArgStr(
+			"s",
+			"string",
+			"String",
+			"tests CmdArgStr class",
+			(E_CmdArgSyntax.isOPT | E_CmdArgSyntax.isVALOPT),
+			"default"
+			);
+		var cmdline3:CmdLine = new CmdLine("cmdline2", [test_string2]);
+		cmdline3.parse(1, []);
+		trace("***Error should not be thrown about string:");
+		cmdline3.parse(1, ["-string"]);
+		
+		trace("***Error should be thrown about char:");
+		var test_char2:CmdArgChar = new CmdArgChar(
+			"c",
+			"char",
+			"Character",
+			"tests CmdArgChar class",
+			(E_CmdArgSyntax.isREQ | E_CmdArgSyntax.isVALREQ),
+			"d"
+			);
+		var cmdline3:CmdLine = new CmdLine("cmdline3", [test_char2]);
+		cmdline3.parse(1, ["-c"]);
+		trace("***Argument '-s' must be refused:");
+		cmdline3.parse(3, ["-c", "l", "-s"]);
+		
+		//List flags
+		trace("***Error must be thrown for int:");
+		var test_list_int2:CmdArgIntList = new CmdArgIntList(
+			"I",
+			"list-int",
+			"Int",
+			"tests CmdArgIntList class",
+			(E_CmdArgSyntax.isREQ | E_CmdArgSyntax.isVALOPT)
+			);
+		var cmdline4:CmdLine = new CmdLine("cmdline4", [test_list_int2]);
+		cmdline4.parse(1, ["-I"]);
+		
+		var test_list_float2:CmdArgFloatList = new CmdArgFloatList(
+			"F",
+			"list-float",
+			"Float",
+			"tests CmdArgFloatList class"
+			);
+		
+		var test_list_string2:CmdArgStrList = new CmdArgStrList(
+			"S",
+			"list-string",
+			"String",
+			"tests CmdArgStrList class"
+			);
+		
+		var test_list_char2:CmdArgCharList = new CmdArgCharList(
+			"C",
+			"list-char",
+			"Character",
+			"tests CmdArgCharList class"
+			);
 	}
 	
 }
