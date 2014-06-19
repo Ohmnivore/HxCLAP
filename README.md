@@ -17,7 +17,7 @@ testCmd.parse(1, ["-b"]);
 trace(test_bool._v); //traces true`
 
 This example was really basic, HxCLAP can power an application that requires much more advanced parsing.
-Check out src/Main.hx to see examples.
+Check out src/Main.hx for examples.
 
 ### TODO:
 * Document CmdArg subclasses
