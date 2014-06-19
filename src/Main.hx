@@ -26,15 +26,16 @@ class Main
 		//Simple flags
 		var test_bool:CmdArgBool = new CmdArgBool(
 			"b",
-			"Bool",
-			"tests CmdArgBool class"
+			"bool",
+			"tests CmdArgBool class",
+			(E_CmdArgSyntax.isHIDDEN) //Shouldn't show up in usage
 			);
 		argarr.push(test_bool);
 		
 		var test_int:CmdArgInt = new CmdArgInt(
 			"i",
+			"int",
 			"Int",
-			"valueName",
 			"tests CmdArgInt class"
 			);
 		argarr.push(test_int);
@@ -71,7 +72,7 @@ class Main
 		var test_list_int:CmdArgIntList = new CmdArgIntList(
 			"I",
 			"list-int",
-			"List of ints",
+			"Int",
 			"tests CmdArgIntList class"
 			);
 		argarr.push(test_list_int);
@@ -79,7 +80,7 @@ class Main
 		var test_list_float:CmdArgFloatList = new CmdArgFloatList(
 			"F",
 			"list-float",
-			"List of floats",
+			"Float",
 			"tests CmdArgFloatList class"
 			);
 		argarr.push(test_list_float);
@@ -87,7 +88,7 @@ class Main
 		var test_list_string:CmdArgStrList = new CmdArgStrList(
 			"S",
 			"list-string",
-			"List of strings",
+			"String",
 			"tests CmdArgStrList class"
 			);
 		argarr.push(test_list_string);
@@ -95,14 +96,13 @@ class Main
 		var test_list_char:CmdArgCharList = new CmdArgCharList(
 			"C",
 			"list-char",
-			"List of characters",
+			"Character",
 			"tests CmdArgCharList class"
 			);
 		argarr.push(test_list_char);
 		
 		var testCmd:CmdLine = new CmdLine("Test", argarr);
 		
-		//testCmd.usage();
 		var parseArr:Array<String> = [
 			"-bool",
 			"-int", "1234",
@@ -115,6 +115,7 @@ class Main
 			"-C", "H, E, L, L, O"  //same as -list-char
 			];
 		testCmd.parse(parseArr.length, parseArr);
+		trace("");
 		trace("***Done parsing, if no other previous messages were shown then all went smooth.");
 		trace("");
 		trace("***Now, parse results are shown for following args: " + parseArr);
@@ -131,7 +132,7 @@ class Main
 		
 		trace("");
 		trace("***Now tracing usage: ");
-		testCmd.usage();
+		testCmd.defaultTraceUsage();
 		//--------------------------------------------------------------//
 	}
 	

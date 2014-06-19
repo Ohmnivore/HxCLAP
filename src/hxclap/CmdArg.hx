@@ -1,5 +1,7 @@
 package hxclap;
 
+import hxclap.CmdLine.ArgType;
+
 /**
  * ...
  * @author Ohmnivore
@@ -22,6 +24,15 @@ class E_CmdArgSyntax
 	public static inline var isHIDDEN:Int    = 0x10;  // argument is not to be printed in usage    
 }
 
+class ArgError
+{
+	public static inline var OPT_CONFLICT_REQUIRED:Int = -1;
+	public static inline var INVALID_ARG:Int = -2;
+	public static inline var SPACE_DELIMITER:Int = -3;
+	public static inline var TOO_FEW_ARGS:Int = -4;
+	public static inline var TOO_MANY_ARGS:Int = -5;
+}
+
 //Definition of class CmdArg
 class CmdArg
 {
@@ -31,6 +42,57 @@ class CmdArg
 	public var _description:String;
 	public var _syntaxFlags:Int;
 	public var _status:Int;
+	
+	//Callback
+	public var parseError:Int->CmdArg->Int->String->Void;
+	
+	public function setUpDefaultCallbacks():Void
+	{
+		parseError = HandleParseError;
+	}
+	
+	public function HandleParseError(E:Int, Cmd:CmdArg, T:Int, Arg:String=""):Void
+	{
+		if (E == ArgError.OPT_CONFLICT_REQUIRED)
+		{
+			trace("Warning: keyword " + Cmd.getKeyword() + " can't be optional AND required");
+			trace(" changing the syntax of " + Cmd.getKeyword() + " to be required.");
+		}
+		
+		if (E == ArgError.INVALID_ARG)
+		{
+			switch(T)
+			{
+				case ArgType.ARG_INT:
+					trace(" invalid integer value '" + Arg + "'");
+				case ArgType.ARG_FLOAT:
+					trace(" invalid float value '" + Arg + "'");
+				case ArgType.ARG_CHAR:
+					trace(" value '" + Arg + "' is too long. ignoring");
+				
+				case ArgType.ARG_LIST_INT:
+					trace(" invalid float value '" + Arg + "'");
+				case ArgType.ARG_LIST_FLOAT:
+					trace(" invalid float value '" + Arg + "'");
+				case ArgType.ARG_LIST_CHAR:
+					trace(" invalid float value '" + Arg + "'");
+			}
+		}
+		
+		if (E == ArgError.SPACE_DELIMITER)
+		{
+			trace("ERROR: space can't be a delimiter");
+		}
+		
+		if (E == ArgError.TOO_FEW_ARGS)
+		{
+			trace("Too few arguments to the switch -" + Cmd.getKeyword());
+		}
+		if (E == ArgError.TOO_MANY_ARGS)
+		{
+			trace("Too many arguments to the switch -" + Cmd.getKeyword());
+		}
+	}
 	
 	private function setValueName(S:String):Void
 	{
@@ -52,6 +114,7 @@ class CmdArg
 		_syntaxFlags = syntaxFlags;
 		_status = E_CmdArgStatus.isBAD;
 		
+		setUpDefaultCallbacks();
 		validate_flags();
 	}
 	
@@ -120,13 +183,10 @@ class CmdArg
 	public function setFound():Void
 	{
 		_status |= E_CmdArgStatus.isFOUND;
-		//trace((_syntaxFlags & E_CmdArgStatus.isFOUND), E_CmdArgStatus.isFOUND, ((0x00 | 0x02) & 0x02));
 	}
 	
 	public function isFound():Bool
 	{
-		//return (_status & E_CmdArgStatus.isFOUND);
-		//trace((_syntaxFlags & E_CmdArgStatus.isFOUND));
 		if (_status & E_CmdArgStatus.isFOUND > 0)
 			return true;
 		
@@ -176,8 +236,47 @@ class CmdArg
 	{
 		if ((_syntaxFlags & E_CmdArgSyntax.isOPT > 0) && (_syntaxFlags & E_CmdArgSyntax.isREQ > 0))
 		{
-			trace("Warning: keyword " + getKeyword() + " can't be optional AND required\n");
-			trace(" changing the syntax of " + getKeyword() + " to be required.\n");
+			var type:Int = 0;
+			
+			if (Std.is(this, CmdArgBool))
+			{
+				type = ArgType.ARG_BOOL;
+			}
+			if (Std.is(this, CmdArgInt))
+			{
+				type = ArgType.ARG_INT;
+			}
+			if (Std.is(this, CmdArgFloat))
+			{
+				type = ArgType.ARG_FLOAT;
+			}
+			if (Std.is(this, CmdArgStr))
+			{
+				type = ArgType.ARG_STRING;
+			}
+			if (Std.is(this, CmdArgChar))
+			{
+				type = ArgType.ARG_CHAR;
+			}
+			
+			if (Std.is(this, CmdArgIntList))
+			{
+				type = ArgType.ARG_LIST_INT;
+			}
+			if (Std.is(this, CmdArgFloatList))
+			{
+				type = ArgType.ARG_LIST_FLOAT;
+			}
+			if (Std.is(this, CmdArgStrList))
+			{
+				type = ArgType.ARG_LIST_STRING;
+			}
+			if (Std.is(this, CmdArgCharList))
+			{
+				type = ArgType.ARG_LIST_CHAR;
+			}
+			
+			parseError(ArgError.OPT_CONFLICT_REQUIRED, this, type, "");
 			
 			_syntaxFlags &= ~E_CmdArgSyntax.isOPT;
 			return false;
@@ -185,8 +284,47 @@ class CmdArg
 		
 		if ((_syntaxFlags & E_CmdArgSyntax.isVALOPT > 0) && (_syntaxFlags & E_CmdArgSyntax.isVALREQ > 0))
 		{
-		   trace("Warning: value for keyword " + getKeyword() + " can't be optional AND required\n");
-		   trace("changing the syntax for the value of " + getKeyword() + " to be required.\n");
+		   var type:Int = 0;
+			
+			if (Std.is(this, CmdArgBool))
+			{
+				type = ArgType.ARG_BOOL;
+			}
+			if (Std.is(this, CmdArgInt))
+			{
+				type = ArgType.ARG_INT;
+			}
+			if (Std.is(this, CmdArgFloat))
+			{
+				type = ArgType.ARG_FLOAT;
+			}
+			if (Std.is(this, CmdArgStr))
+			{
+				type = ArgType.ARG_STRING;
+			}
+			if (Std.is(this, CmdArgChar))
+			{
+				type = ArgType.ARG_CHAR;
+			}
+			
+			if (Std.is(this, CmdArgIntList))
+			{
+				type = ArgType.ARG_LIST_INT;
+			}
+			if (Std.is(this, CmdArgFloatList))
+			{
+				type = ArgType.ARG_LIST_FLOAT;
+			}
+			if (Std.is(this, CmdArgStrList))
+			{
+				type = ArgType.ARG_LIST_STRING;
+			}
+			if (Std.is(this, CmdArgCharList))
+			{
+				type = ArgType.ARG_LIST_CHAR;
+			}
+			
+			parseError(ArgError.OPT_CONFLICT_REQUIRED, this, type, "");
 		   
 			_syntaxFlags &= ~E_CmdArgSyntax.isVALREQ;
 			return false;
@@ -199,7 +337,7 @@ class CmdArg
 //Definition of class CmdArgInt
 class CmdArgInt extends CmdArg
 {
-	public var _v:Float;
+	public var _v:Int;
 	
 	public function new(optChar:String, keyword:String, valueName:String, description:String,
 		syntaxFlags:Int = (E_CmdArgSyntax.isREQ | E_CmdArgSyntax.isVALREQ), def:Int = 0)
@@ -225,7 +363,7 @@ class CmdArgInt extends CmdArg
 			
 			catch (e:Dynamic)
 			{
-				trace(" invalid integer value \\" + arg + "\\");
+				parseError(ArgError.INVALID_ARG, this, ArgType.ARG_INT, arg);
 				return false;
 			}
 			
@@ -271,7 +409,7 @@ class CmdArgFloat extends CmdArg
 			
 			catch (e:Dynamic)
 			{
-				trace(" invalid integer value \\" + arg + "\\");
+				parseError(ArgError.INVALID_ARG, this, ArgType.ARG_FLOAT, arg);
 				return false;
 			}
 			
@@ -367,7 +505,7 @@ class CmdArgChar extends CmdArg
 			
 			if (arg.length > 1)
 			{
-				trace("value \\" + arg + "\\ is too long. ignoring\n");
+				parseError(ArgError.INVALID_ARG, this, ArgType.ARG_CHAR, arg);
 				return false;
 			}
 			
@@ -409,13 +547,11 @@ class CmdArgTypeList<T> extends CmdArg
 		buf = getValueName();
 		if (buf.length == 0)
 			buf += " ";
-		//[TODO]Not sure about this one...
-		buf += _delimiters.charAt(0) + "..." + _delimiters.charAt(0) + getValueName();
+		buf += _delimiters.charAt(0) + " ..." + _delimiters.charAt(0) + " " + getValueName() + ' (Min: $_min Max: $_max)';
 		setValueName(buf);
 		
 		buf = "";
-		//[TODO]This is probably wrong
-		buf += '$description ($_min $_max)';
+		buf += '$description';
 		setDescription(buf);
 		
 		var i:Int = 0;
@@ -423,8 +559,7 @@ class CmdArgTypeList<T> extends CmdArg
 		{
 			if (delim.charAt(i) == ' ')
 			{
-				//[TODO]Gotta throw an exception
-				trace("ERROR: space can't be a delimiter");
+				parseError(ArgError.SPACE_DELIMITER, this, ArgType.ARG_LIST_STRING, "");
 			}
 			
 			i++;
@@ -451,7 +586,6 @@ class CmdArgTypeList<T> extends CmdArg
 		return true;
 	}
 	
-	//[TODO]Not too sure about the iterator
 	public function getItem(Index:Int):T
 	{
 		Index = Index % _list.length;
@@ -492,15 +626,13 @@ class CmdArgTypeList<T> extends CmdArg
 	{
 		if (_list.length < _min)
 		{
-			//[TODO]Throw an exception
-			trace("Too few arguments to the switch -" + getKeyword() + "\n");
+			parseError(ArgError.TOO_FEW_ARGS, this, ArgType.ARG_LIST_INT, "");
 			return false;
 		}
 		
 		if (_list.length > _max)
 		{
-			//[TODO]Throw an exception
-			trace("Too many arguments to the switch -" + getKeyword() + "\n");
+			parseError(ArgError.TOO_MANY_ARGS, this, ArgType.ARG_LIST_INT, "");
 			return false;
 		}
 		
@@ -543,7 +675,7 @@ class CmdArgIntList extends CmdArgTypeList<Int>
 				}
 				else
 				{
-					trace("invalid integer value \\" + v + "\\\n");
+					parseError(ArgError.INVALID_ARG, this, ArgType.ARG_LIST_INT, v);
 					return false;
 				}
 			}
@@ -586,7 +718,7 @@ class CmdArgFloatList extends CmdArgTypeList<Float>
 				}
 				else
 				{
-					trace("invalid float value \\" + v + "\\\n");
+					parseError(ArgError.INVALID_ARG, this, ArgType.ARG_LIST_FLOAT, v);
 					return false;
 				}
 			}
@@ -662,7 +794,7 @@ class CmdArgCharList extends CmdArgTypeList<String>
 				}
 				else
 				{
-					trace("invalid char value \"" + v + "\"\n");
+					parseError(ArgError.INVALID_ARG, this, ArgType.ARG_LIST_CHAR, v);
 				}
 			}
 			

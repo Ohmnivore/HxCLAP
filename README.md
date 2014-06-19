@@ -7,6 +7,4 @@ My goal with this port is to create a cross-platform solution that isn't exclusi
 
 ### TODO:
 * Document everything with comments
-* Event system for feedback/messages instead of "trace"
-* Correct feedback formatting/additional classes?
 * Write more in-depth tests
