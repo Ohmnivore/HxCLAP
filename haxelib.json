@@ -1,0 +1,11 @@
+{
+  "name": "HxCLAP",
+  "url" : "https://github.com/Ohmnivore/HxCLAP",
+  "license": "MIT",
+  "tags": ["parser", "command", "shell", "line", "argument"],
+  "description": "Haxe port of CLAP, a C++ command line argument parser",
+  "version": "1.0.1",
+  "releasenote": "Initial haxelib release, I seriosuly doubt there will be any new ones",
+  "contributors": ["Ohmnivore"],
+  "dependencies": {}
+}
