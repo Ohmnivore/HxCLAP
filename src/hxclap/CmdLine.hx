@@ -1,5 +1,6 @@
 package hxclap;
 
+import hxclap.CmdElem;
 import hxclap.CmdArg.E_CmdArgSyntax;
 
 import hxclap.CmdArg.CmdArgBool;
@@ -13,6 +14,9 @@ import hxclap.CmdArg.CmdArgFloatList;
 import hxclap.CmdArg.CmdArgStrList;
 import hxclap.CmdArg.CmdArgCharList;
 
+import hxclap.CmdTarget.CmdTargStrList;
+import hxclap.CmdTarget.CmdTargStr;
+
 /**
  * ...
  * @author Ohmnivore
@@ -23,7 +27,8 @@ import hxclap.CmdArg.CmdArgCharList;
  */
 class CmdLine
 {
-	private var _cmdList:Array<CmdArg>;
+	private var _cmdList:Array<CmdElem>;
+	private var _targList:Array<CmdTarget>;
 	private var _progName:String;
 	private var _maxLength:Int;
 	
@@ -35,26 +40,27 @@ class CmdLine
 	/**
 	 * Called when a required flag wasn't passed to the parser
 	 */
-	public var missingRequiredSwitch:CmdArg->Void;
+	public var missingRequiredSwitch:CmdElem->Void;
 	
 	/**
 	 * Called when a flag's argument couldn't be parsed
 	 */
-	public var argNotFound:CmdArg->Void;
+	public var argNotFound:CmdElem->Void;
 	/**
 	 * Called when a flag doesn't receive its required argument
 	 */
-	public var missingRequiredArg:CmdArg->Void;
+	public var missingRequiredArg:CmdElem->Void;
 	
 	/**
 	 * @param ProgName	The program's name - typically the application's name
 	 * @param cmds		Flags available for this application
 	 */
-	public function new(progName:String, cmds:Array<CmdArg>) 
+	public function new(progName:String, cmds:Array<CmdElem>) 
 	{
 		_progName = progName;
 		_maxLength = 0;
 		_cmdList = [];
+		_targList = [];
 		
 		setUpDefaultCallbacks();
 		
@@ -62,6 +68,11 @@ class CmdLine
 		{
 			_cmdList.push(cmd);
 			_maxLength = Std.int(Math.max(_maxLength, cmd._valueName.length));
+			
+			if (!cmd.isArg)
+			{
+				_targList.push(cast cmd);
+			}
 		}
 	}
 	
@@ -76,7 +87,7 @@ class CmdLine
 		
 		for (cmd in u.args)
 		{
-			if (cmd.type < 5)
+			if (cmd.type < 6)
 			{
 				_traceSimple(cmd);
 			}
@@ -103,7 +114,10 @@ class CmdLine
 			expects = '[$expects]';
 		}
 		
-		trace('-$longName (-$shortName) -> $description -> expects: $expects');
+		if (cmd.type == ArgType.TARG_STRING)
+			trace('$longName -> $description -> expects: $expects');
+		else
+			trace('-$longName (-$shortName) -> $description -> expects: $expects');
 	}
 	
 	private function _traceList(cmd:ArgInfo):Void
@@ -122,7 +136,10 @@ class CmdLine
 			expects = '[$expects]';
 		}
 		
-		trace('-$longName (-$shortName) -> $description -> expects: $expects');
+		if (cmd.type == ArgType.TARG_LIST_STRING)
+			trace('$longName -> $description -> expects: $expects');
+		else
+			trace('-$longName (-$shortName) -> $description -> expects: $expects');
 	}
 	
 	private function setUpDefaultCallbacks():Void
@@ -139,19 +156,28 @@ class CmdLine
 		trace("Warning: argument '" + Switch + "' looks strange, ignoring");
 	}
 	
-	public function HandleMissingSwitch(Cmd:CmdArg):Void
+	public function HandleMissingSwitch(Cmd:CmdElem):Void
 	{
-		trace("Error: the switch -" + Cmd.getKeyword() + " must be supplied");
+		if (Cmd.isArg)
+			trace("Error: the switch -" + Cmd.getKeyword() + " must be supplied");
+		else
+			trace("Error: the target " + Cmd.getKeyword() + " must be supplied");
 	}
 	
-	public function HandleArgNotFound(Cmd:CmdArg):Void
+	public function HandleArgNotFound(Cmd:CmdElem):Void
 	{
-		trace("Error: switch -" + Cmd.getKeyword() + " must take an argument");
+		if (Cmd.isArg)
+			trace("Error: switch -" + Cmd.getKeyword() + " must take an argument");
+		else
+			trace("Error: target " + Cmd.getKeyword() + " must take an argument");
 	}
 	
-	public function HandleMissingArg(Cmd:CmdArg):Void
+	public function HandleMissingArg(Cmd:CmdElem):Void
 	{
-		trace("Error: the switch -" + Cmd.getKeyword() + " must take a value");
+		if (Cmd.isArg)
+			trace("Error: the switch -" + Cmd.getKeyword() + " must take a value");
+		else
+			trace("Error: the target " + Cmd.getValueName() + " must take a value");
 	}
 	
 	/**
@@ -164,7 +190,15 @@ class CmdLine
 		
 		for (cmd in _cmdList)
 		{
-			if (!cmd.isHidden())
+			if (!cmd.isHidden() && !cmd.isArg)
+			{
+				u.args.push(new ArgInfo(cmd));
+			}
+		}
+		
+		for (cmd in _cmdList)
+		{
+			if (!cmd.isHidden() && cmd.isArg)
 			{
 				u.args.push(new ArgInfo(cmd));
 			}
@@ -180,9 +214,75 @@ class CmdLine
 	 */
 	public function parse(argc:Int, argv:Array<String>):Void
 	{
-		var cmd:CmdArg;
+		var cmd:CmdElem;
 		
 		var i:Int = 0;
+		for (t in _targList)
+		{
+			if (Std.is(t, CmdTargStrList))
+			{
+				var tl:CmdTargStrList = cast t;
+				
+				while(true)
+				{
+					var arg:String = argv[0];
+					
+					if (arg.charAt(0) == "-")
+					{
+						if (!tl.isValOpt() && tl._list.length == 0)
+						{
+							if (argNotFound != null)
+							{
+								argNotFound(tl);
+							}
+						}
+						
+						break;
+					}
+					else
+					{
+						tl.setFound();
+						tl._list.push(arg);
+						tl.setValFound();
+						
+						argv.shift();
+					}
+				}
+			}
+			else
+			{
+				var val:String = argv[i];
+				
+				if (val.charAt(0) == "-")
+				{
+					if (t.isValOpt())
+						continue;
+					else
+					{
+						if (argNotFound != null)
+						{
+							argNotFound(t);
+						}
+					}
+				}
+				
+				t.setFound();
+				if (!t.getValue(i, argc, argv))
+				{
+					if (argNotFound != null && !t.isValOpt())
+					{
+						argNotFound(t);
+					}
+				}
+				else
+				{
+					t.setValFound();
+				}
+				argv.shift();
+			}
+		}
+		
+		i = 0;
 		while (i < argv.length)
 		{
 			var arg:String = argv[i];
@@ -328,7 +428,7 @@ class ArgInfo
 	 */
 	public var isVALREQ:Bool = false;
 	
-	public function new(Arg:CmdArg)
+	public function new(Arg:CmdElem)
 	{
 		longName = Arg._keyword;
 		shortName = Arg._optChar;
@@ -395,9 +495,20 @@ class ArgInfo
 			type = ArgType.ARG_LIST_CHAR;
 			initList(Arg);
 		}
+		
+		//Other
+		if (Std.is(Arg, CmdTargStr))
+		{
+			type = ArgType.TARG_STRING;
+		}
+		if (Std.is(Arg, CmdTargStrList))
+		{
+			type = ArgType.TARG_LIST_STRING;
+			initList(Arg);
+		}
 	}
 	
-	private function initList(Arg:CmdArg):Void
+	private function initList(Arg:CmdElem):Void
 	{
 		min = Reflect.field(Arg, "_min");
 		max = Reflect.field(Arg, "_max");
@@ -411,9 +522,12 @@ class ArgType
 	public static inline var ARG_FLOAT:Int = 2;
 	public static inline var ARG_STRING:Int = 3;
 	public static inline var ARG_CHAR:Int = 4;
+	public static inline var TARG_STRING:Int = 5;
 	
-	public static inline var ARG_LIST_INT:Int = 5;
-	public static inline var ARG_LIST_FLOAT:Int = 6;
-	public static inline var ARG_LIST_STRING:Int = 7;
-	public static inline var ARG_LIST_CHAR:Int = 8;
+	public static inline var ARG_LIST_INT:Int = 6;
+	public static inline var ARG_LIST_FLOAT:Int = 7;
+	public static inline var ARG_LIST_STRING:Int = 8;
+	public static inline var ARG_LIST_CHAR:Int = 9;
+	
+	public static inline var TARG_LIST_STRING:Int = 10;
 }

@@ -5,6 +5,8 @@ import flash.display.StageScaleMode;
 import flash.Lib;
 import hxclap.CmdArg;
 import hxclap.CmdLine;
+import hxclap.CmdTarget;
+import hxclap.CmdElem;
 
 /**
  * ...
@@ -20,8 +22,49 @@ class Main
 		stage.scaleMode = StageScaleMode.NO_SCALE;
 		stage.align = StageAlign.TOP_LEFT;
 		
+		var argarr2:Array<CmdElem> = [];
+		
+		var test_string2:CmdTargStr = new CmdTargStr(
+			"source",
+			"filename",
+			"tests CmdTargStr class",
+			(E_CmdArgSyntax.isOPT | E_CmdArgSyntax.isVALOPT),
+			"file"
+			);
+		argarr2.push(test_string2);
+		
+		var test_string_list2:CmdTargStrList = new CmdTargStrList(
+			"copies",
+			"filename",
+			"tests CmdTargStrList class",
+			(E_CmdArgSyntax.isREQ | E_CmdArgSyntax.isVALREQ),
+			1,
+			100
+			);
+		argarr2.push(test_string_list2);
+		
+		var test_bool2:CmdArgBool = new CmdArgBool(
+			"b",
+			"bool",
+			"tests CmdArgBool class",
+			(E_CmdArgSyntax.isREQ | E_CmdArgSyntax.isVALREQ)
+			);
+		argarr2.push(test_bool2);
+		
+		var testCmd2:CmdLine = new CmdLine("Test2", argarr2);
+		
+		var parseArr2:Array<String> = [
+			"samplefile.hx", "samplefile2.hx", "lolfile",
+			"-b"
+			];
+		
+		testCmd2.parse(parseArr2.length, parseArr2);
+		trace(test_string2._v);
+		trace(test_string_list2._list);
+		testCmd2.defaultTraceUsage();
+		
 		//--------------------------------------------------------------//
-		var argarr:Array<CmdArg> = [];
+		var argarr:Array<CmdElem> = [];
 		
 		//Simple flags
 		var test_bool:CmdArgBool = new CmdArgBool(
@@ -132,7 +175,7 @@ class Main
 		
 		trace("");
 		trace("***Now tracing usage: ");
-		testCmd.defaultTraceUsage();
+		//testCmd.defaultTraceUsage();
 		//--------------------------------------------------------------//
 		
 		trace("***Warning should be thrown about bool:");
