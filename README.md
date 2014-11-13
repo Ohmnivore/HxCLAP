@@ -5,7 +5,7 @@ Haxe port of CLAP, a C++ command line argument parser:
 
 My goal with this port is to create a cross-platform solution that isn't exclusively destined for console programs. For example, it must be able to parse from an input string, not just from Sys.args(). I plan to use it for a HaxeFlixel game where I will implement a shell interface.
 
-For usage, the best thing would be to check out the docs at the CLAP website, the API is exactly the same.
+For usage, the best thing would be to check out the docs at the CLAP website, the API is very similar.
 
 ### Quick examples:
     var test_bool:CmdArgBool = new CmdArgBool(
@@ -24,9 +24,9 @@ For usage, the best thing would be to check out the docs at the CLAP website, th
 			100
 			);
     var testCmd:CmdLine = new CmdLine("Test", [test_bool, test_string_list]);
-    testCmd.parse(4, ["filename1", "filename2", "filename3", "-b"]);
-    trace(test_bool._v); //traces true
-    trace(test_string_list2._list); //traces ["filename1", "filename2", "filename3"]
+    testCmd.parse(["filename1", "filename2", "filename3", "-b"]);
+    trace(test_bool.value); //traces true
+    trace(test_string_list2.list); //traces ["filename1", "filename2", "filename3"]
 
 These examples are quite basic, HxCLAP can power an application that requires much more advanced parsing.
 Check out src/Main.hx for examples.

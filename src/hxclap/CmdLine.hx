@@ -67,7 +67,7 @@ class CmdLine
 		for (cmd in cmds)
 		{
 			_cmdList.push(cmd);
-			_maxLength = Std.int(Math.max(_maxLength, cmd._valueName.length));
+			_maxLength = Std.int(Math.max(_maxLength, cmd.valueName.length));
 			
 			if (!cmd.isArg)
 			{
@@ -159,25 +159,25 @@ class CmdLine
 	public function HandleMissingSwitch(Cmd:CmdElem):Void
 	{
 		if (Cmd.isArg)
-			trace("Error: the switch -" + Cmd.getKeyword() + " must be supplied");
+			trace("Error: the switch -" + Cmd.keyword + " must be supplied");
 		else
-			trace("Error: the target " + Cmd.getKeyword() + " must be supplied");
+			trace("Error: the target " + Cmd.keyword + " must be supplied");
 	}
 	
 	public function HandleArgNotFound(Cmd:CmdElem):Void
 	{
 		if (Cmd.isArg)
-			trace("Error: switch -" + Cmd.getKeyword() + " must take an argument");
+			trace("Error: switch -" + Cmd.keyword + " must take an argument");
 		else
-			trace("Error: target " + Cmd.getKeyword() + " must take an argument");
+			trace("Error: target " + Cmd.keyword + " must take an argument");
 	}
 	
 	public function HandleMissingArg(Cmd:CmdElem):Void
 	{
 		if (Cmd.isArg)
-			trace("Error: the switch -" + Cmd.getKeyword() + " must take a value");
+			trace("Error: the switch -" + Cmd.keyword + " must take a value");
 		else
-			trace("Error: the target " + Cmd.getValueName() + " must take a value");
+			trace("Error: the target " + Cmd.keyword + " must take a value");
 	}
 	
 	/**
@@ -212,8 +212,9 @@ class CmdLine
 	 * @param argc		Amount of arguments you wish to pass to the parser
 	 * @param argv		List of arguments to parse, ex: ["-test-arg", "1", "-B"]
 	 */
-	public function parse(argc:Int, argv:Array<String>):Void
+	public function parse(argv:Array<String>):Void
 	{
+		var argc:Int = argv.length;
 		var cmd:CmdElem;
 		
 		var i:Int = 0;
@@ -229,7 +230,7 @@ class CmdLine
 					
 					if (arg.charAt(0) == "-")
 					{
-						if (!tl.isValOpt() && tl._list.length == 0)
+						if (!tl.isValOpt() && tl.list.length == 0)
 						{
 							if (argNotFound != null)
 							{
@@ -242,12 +243,14 @@ class CmdLine
 					else
 					{
 						tl.setFound();
-						tl._list.push(arg);
+						tl.list.push(arg);
 						tl.setValFound();
 						
 						argv.shift();
 					}
 				}
+				
+				tl.validate();
 			}
 			else
 			{
@@ -296,8 +299,8 @@ class CmdLine
 				var cmdWord:String = "";
 				var cmdChar:String = "";
 				
-				cmdWord = "-" + cmd.getKeyword();
-				cmdChar = "-" + cmd.getOptChar();
+				cmdWord = "-" + cmd.keyword;
+				cmdChar = "-" + cmd.optChar;
 				
 				if ((arg == cmdWord) || (arg == cmdChar))
 				{
@@ -430,24 +433,24 @@ class ArgInfo
 	
 	public function new(Arg:CmdElem)
 	{
-		longName = Arg._keyword;
-		shortName = Arg._optChar;
-		description = Arg._description;
-		expects = Arg._valueName;
+		longName = Arg.keyword;
+		shortName = Arg.optChar;
+		description = Arg.description;
+		expects = Arg.valueName;
 		
-		if ((Arg._syntaxFlags & E_CmdArgSyntax.isOPT) > 0)
+		if ((Arg.syntaxFlags & E_CmdArgSyntax.isOPT) > 0)
 		{
 			isOPT = true;
 		}
-		if ((Arg._syntaxFlags & E_CmdArgSyntax.isREQ) > 0)
+		if ((Arg.syntaxFlags & E_CmdArgSyntax.isREQ) > 0)
 		{
 			isREQ = true;
 		}
-		if ((Arg._syntaxFlags & E_CmdArgSyntax.isVALOPT) > 0)
+		if ((Arg.syntaxFlags & E_CmdArgSyntax.isVALOPT) > 0)
 		{
 			isVALOPT = true;
 		}
-		if ((Arg._syntaxFlags & E_CmdArgSyntax.isVALREQ) > 0)
+		if ((Arg.syntaxFlags & E_CmdArgSyntax.isVALREQ) > 0)
 		{
 			isVALREQ = true;
 		}

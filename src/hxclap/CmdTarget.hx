@@ -31,24 +31,19 @@ class CmdTarget extends CmdElem
 		
 		isArg = false;
 	}
-	
-	override public function getOptChar():String 
-	{
-		return getKeyword();
-	}
 }
 
 //Definition of class CmdArgStr
 class CmdTargStr extends CmdTarget
 {
-	public var _v:String;
+	public var value:String;
 	
 	public function new(keyWord:String, valueName:String, description:String,
 		syntaxFlags:Int = (E_CmdArgSyntax.isREQ | E_CmdArgSyntax.isVALREQ), def:String)
 	{
 		super(keyWord, valueName, description, syntaxFlags);
 		
-		_v = def;
+		value = def;
 	}
 	
 	override public function getValue(i:Int, argc:Int, argv:Array<String>):Bool
@@ -58,7 +53,7 @@ class CmdTargStr extends CmdTarget
 			var arg:String = argv[i];
 			
 			if (arg.charAt(0) == "-") return false;
-			_v = arg;
+			value = arg;
 			setParseOK();
 			return true;
 		}
@@ -71,11 +66,11 @@ class CmdTargStr extends CmdTarget
 //Definition of CmdArgTypeList
 class CmdTargTypeList<T> extends CmdTarget
 {
-	public var _list:Array<T>;
-	public var _index:Int;
-	public var _delimiters:String;
-	public var _max:Int;
-	public var _min:Int;
+	public var list:Array<T>;
+	public var index:Int;
+	public var delimiters:String;
+	public var max:Int;
+	public var min:Int;
 	
 	public function new(keyWord:String, valueName:String, description:String,
 		syntaxFlags:Int = (E_CmdArgSyntax.isREQ | E_CmdArgSyntax.isVALREQ),
@@ -85,21 +80,21 @@ class CmdTargTypeList<T> extends CmdTarget
 	{
 		super(keyWord, valueName, description, syntaxFlags);
 		
-		_delimiters = delim;
-		_min = minSize;
-		_max = maxSize;
-		_list = [];
+		delimiters = delim;
+		min = minSize;
+		max = maxSize;
+		list = [];
 		
 		var buf:String = "";
-		buf = getValueName();
+		buf = valueName;
 		if (buf.length == 0)
 			buf += " ";
-		buf += " ..." + " " + getValueName() + ' (Min: $_min Max: $_max)';
-		setValueName(buf);
+		buf += " ..." + " " + valueName + ' (Min: $min Max: $max)';
+		valueName = buf;
 		
 		buf = "";
 		buf += '$description';
-		setDescription(buf);
+		description = buf;
 		
 		var i:Int = 0;
 		while (i < delim.length)
@@ -113,21 +108,6 @@ class CmdTargTypeList<T> extends CmdTarget
 		}
 	}
 	
-	public function getDelimiters():String
-	{
-		return _delimiters;
-	}
-	
-	public function getMaxSize():Int
-	{
-		return _max;
-	}
-	
-	public function getMinSize():Int
-	{
-		return _min;
-	}
-	
 	override public function getValue(i:Int, argc:Int, argv:Array<String>):Bool
 	{
 		return true;
@@ -135,49 +115,49 @@ class CmdTargTypeList<T> extends CmdTarget
 	
 	public function getItem(Index:Int):T
 	{
-		Index = Index % _list.length;
-		while (_index != Index)
+		Index = Index % list.length;
+		while (index != Index)
 		{
-			if (_index < Index)
+			if (index < Index)
 			{
-				_index++;
+				index++;
 			}
 			else
 			{
-				_index++;
+				index++;
 			}
 		}
 		
-		return _list[_index];
+		return list[index];
 	}
 	
 	public function reset():Void
 	{
-		_index = 0;
+		index = 0;
 	}
 	
 	public function size():Int
 	{
-		return _list.length;
+		return list.length;
 	}
 	
 	public function insert(Item:T):Void
 	{
-		if (_list.length < _max)
+		if (list.length < max)
 		{
-			_list.push(Item);
+			list.push(Item);
 		}
 	}
 	
 	public function validate():Bool
 	{
-		if (_list.length < _min)
+		if (list.length < min)
 		{
 			parseError(ArgError.TOO_FEW_ARGS, this, ArgType.ARG_LIST_INT, "");
 			return false;
 		}
 		
-		if (_list.length > _max)
+		if (list.length > max)
 		{
 			parseError(ArgError.TOO_MANY_ARGS, this, ArgType.ARG_LIST_INT, "");
 			return false;
@@ -207,7 +187,7 @@ class CmdTargStrList extends CmdTargTypeList<String>
 		{
 			var tokens:String = argv[i];
 			
-			var tokens_arr:Array<String> = tokens.split(_delimiters.charAt(0));
+			var tokens_arr:Array<String> = tokens.split(delimiters.charAt(0));
 			
 			for (v in tokens_arr)
 			{

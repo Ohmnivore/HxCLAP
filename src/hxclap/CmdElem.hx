@@ -16,6 +16,9 @@ import hxclap.CmdArg.CmdArgFloatList;
 import hxclap.CmdArg.CmdArgStrList;
 import hxclap.CmdArg.CmdArgCharList;
 
+import hxclap.CmdTarget.CmdTargStr;
+import hxclap.CmdTarget.CmdTargStrList;
+
 /**
  * ...
  * @author Ohmnivore
@@ -25,23 +28,23 @@ class CmdElem
 {
 	public var isArg:Bool = true;
 	
-	public var _optChar:String;
-	public var _keyword:String;
-	public var _valueName:String;
-	public var _description:String;
-	public var _syntaxFlags:Int;
-	public var _status:Int;
+	public var optChar:String;
+	public var keyword:String;
+	public var valueName:String;
+	public var description:String;
+	public var syntaxFlags:Int;
+	public var status:Int;
 	
 	//Callback
 	public var parseError:Int->CmdElem->Int->String->Void;
 	
 	public function new(keyWord:String, valueName:String, description:String, syntaxFlags:Int) 
 	{
-		_keyword = keyWord;
-		_valueName = valueName;
-		_description = description;
-		_syntaxFlags = syntaxFlags;
-		_status = E_CmdArgStatus.isBAD;
+		this.keyword = keyWord;
+		this.valueName = valueName;
+		this.description = description;
+		this.syntaxFlags = syntaxFlags;
+		this.status = E_CmdArgStatus.isBAD;
 		
 		setUpDefaultCallbacks();
 		validate_flags();
@@ -56,8 +59,8 @@ class CmdElem
 	{
 		if (E == ArgError.OPT_CONFLICT_REQUIRED)
 		{
-			trace("Warning: keyword " + Cmd.getKeyword() + " can't be optional AND required");
-			trace(" changing the syntax of " + Cmd.getKeyword() + " to be required.");
+			trace("Warning: keyword " + Cmd.keyword + " can't be optional AND required");
+			trace(" changing the syntax of " + Cmd.keyword + " to be required.");
 		}
 		
 		if (E == ArgError.INVALID_ARG)
@@ -87,44 +90,17 @@ class CmdElem
 		
 		if (E == ArgError.TOO_FEW_ARGS)
 		{
-			trace("Too few arguments to the switch -" + Cmd.getKeyword());
+			trace("Too few arguments to the switch -" + Cmd.keyword);
 		}
 		if (E == ArgError.TOO_MANY_ARGS)
 		{
-			trace("Too many arguments to the switch -" + Cmd.getKeyword());
+			trace("Too many arguments to the switch -" + Cmd.keyword);
 		}
-	}
-	
-	// selectors
-	public function getOptChar():String
-	{
-		return _optChar;
-	}
-	
-	public function getKeyword():String
-	{
-		return _keyword;
-	}
-	
-	public function getValueName():String
-	{
-		return _valueName;
-	}
-	
-	public function getDescription():String
-	{
-		return _description;
-	}
-	
-	public function getSyntaxFlags():Int
-	{
-		return _syntaxFlags;
 	}
 	
 	public function isHidden():Bool
 	{
-		//return (_syntaxFlags & E_CmdArgSyntax.isHIDDEN);
-		if (_syntaxFlags & E_CmdArgSyntax.isHIDDEN > 0)
+		if (syntaxFlags & E_CmdArgSyntax.isHIDDEN > 0)
 			return true;
 		
 		return false;
@@ -132,8 +108,7 @@ class CmdElem
 	
 	public function isOpt():Bool
 	{
-		//return (_syntaxFlags & E_CmdArgSyntax.isOPT);
-		if (_syntaxFlags & E_CmdArgSyntax.isOPT > 0)
+		if (syntaxFlags & E_CmdArgSyntax.isOPT > 0)
 			return true;
 		
 		return false;
@@ -141,8 +116,7 @@ class CmdElem
 	
 	public function isValOpt():Bool
 	{
-		//return (_syntaxFlags & E_CmdArgSyntax.isVALOPT);
-		if (_syntaxFlags & E_CmdArgSyntax.isVALOPT > 0)
+		if (syntaxFlags & E_CmdArgSyntax.isVALOPT > 0)
 			return true;
 		
 		return false;
@@ -150,45 +124,33 @@ class CmdElem
 	
 	public function isBad():Bool
 	{
-		//return _status;
-		if (_status > 0)
+		if (status > 0)
 			return true;
 		
 		return false;
-	}
-	
-	private function setValueName(S:String):Void
-	{
-		_valueName = S;
-	}
-	
-	private function setDescription(S:String):Void
-	{
-		_description = S;
-	}
-	
-	public function setFound():Void
-	{
-		_status |= E_CmdArgStatus.isFOUND;
 	}
 	
 	public function isFound():Bool
 	{
-		if (_status & E_CmdArgStatus.isFOUND > 0)
+		if (status & E_CmdArgStatus.isFOUND > 0)
 			return true;
 		
 		return false;
 	}
 	
+	public function setFound():Void
+	{
+		status |= E_CmdArgStatus.isFOUND;
+	}
+	
 	public function setValFound():Void
 	{
-		_status |= E_CmdArgStatus.isVALFOUND;
+		status |= E_CmdArgStatus.isVALFOUND;
 	}
 	
 	public function isValFound():Bool
 	{
-		//return (_status & E_CmdArgStatus.isVALFOUND);
-		if ((_status & E_CmdArgStatus.isVALFOUND) > 0)
+		if ((status & E_CmdArgStatus.isVALFOUND) > 0)
 			return true;
 		
 		return false;
@@ -196,13 +158,12 @@ class CmdElem
 	
 	public function setParseOK():Void
 	{
-		_status |= E_CmdArgStatus.isPARSEOK;
+		status |= E_CmdArgStatus.isPARSEOK;
 	}
 	
 	public function isParseOK():Bool
 	{
-		//return (_status & E_CmdArgStatus.isPARSEOK);
-		if (_status & E_CmdArgStatus.isPARSEOK > 0)
+		if (status & E_CmdArgStatus.isPARSEOK > 0)
 			return true;
 		
 		return false;
@@ -221,7 +182,7 @@ class CmdElem
 	
 	public function validate_flags():Bool
 	{
-		if ((_syntaxFlags & E_CmdArgSyntax.isOPT > 0) && (_syntaxFlags & E_CmdArgSyntax.isREQ > 0))
+		if ((syntaxFlags & E_CmdArgSyntax.isOPT > 0) && (syntaxFlags & E_CmdArgSyntax.isREQ > 0))
 		{
 			var type:Int = 0;
 			
@@ -263,13 +224,22 @@ class CmdElem
 				type = ArgType.ARG_LIST_CHAR;
 			}
 			
+			if (Std.is(this, CmdTargStr))
+			{
+				type = ArgType.TARG_STRING;
+			}
+			if (Std.is(this, CmdTargStrList))
+			{
+				type = ArgType.TARG_LIST_STRING;
+			}
+			
 			parseError(ArgError.OPT_CONFLICT_REQUIRED, this, type, "");
 			
-			_syntaxFlags &= ~E_CmdArgSyntax.isOPT;
+			syntaxFlags &= ~E_CmdArgSyntax.isOPT;
 			return false;
 		}
 		
-		if ((_syntaxFlags & E_CmdArgSyntax.isVALOPT > 0) && (_syntaxFlags & E_CmdArgSyntax.isVALREQ > 0))
+		if ((syntaxFlags & E_CmdArgSyntax.isVALOPT > 0) && (syntaxFlags & E_CmdArgSyntax.isVALREQ > 0))
 		{
 		   var type:Int = 0;
 			
@@ -311,9 +281,18 @@ class CmdElem
 				type = ArgType.ARG_LIST_CHAR;
 			}
 			
+			if (Std.is(this, CmdTargStr))
+			{
+				type = ArgType.TARG_STRING;
+			}
+			if (Std.is(this, CmdTargStrList))
+			{
+				type = ArgType.TARG_LIST_STRING;
+			}
+			
 			parseError(ArgError.OPT_CONFLICT_REQUIRED, this, type, "");
 		   
-			_syntaxFlags &= ~E_CmdArgSyntax.isVALREQ;
+			syntaxFlags &= ~E_CmdArgSyntax.isVALREQ;
 			return false;
 		}
 		

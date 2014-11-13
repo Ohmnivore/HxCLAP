@@ -58,9 +58,9 @@ class Main
 			"-b"
 			];
 		
-		testCmd2.parse(parseArr2.length, parseArr2);
-		trace(test_string2._v);
-		trace(test_string_list2._list);
+		testCmd2.parse(parseArr2);
+		trace(test_string2.value);
+		trace(test_string_list2.list);
 		testCmd2.defaultTraceUsage();
 		
 		//--------------------------------------------------------------//
@@ -157,17 +157,17 @@ class Main
 			"-S", "Come, on, baby, light, my, fire", //same as -list-string
 			"-C", "H, E, L, L, O"  //same as -list-char
 			];
-		testCmd.parse(parseArr.length, parseArr);
+		testCmd.parse(parseArr);
 		trace("");
 		trace("***Done parsing, if no other previous messages were shown then all went smooth.");
 		trace("");
 		trace("***Now, parse results are shown for following args: " + parseArr);
 		
-		trace(test_bool, test_bool._v);
-		trace(test_int, test_int._v);
-		trace(test_float, test_float._v);
-		trace(test_string, test_string._v);
-		trace(test_char, test_char._v);
+		trace(test_bool, test_bool.value);
+		trace(test_int, test_int.value);
+		trace(test_float, test_float.value);
+		trace(test_string, test_string.value);
+		trace(test_char, test_char.value);
 		trace(test_list_int, test_list_int._list);
 		trace(test_list_float, test_list_float._list);
 		trace(test_list_string, test_list_string._list);
@@ -205,7 +205,7 @@ class Main
 			(E_CmdArgSyntax.isREQ)
 			);
 		var cmdline2:CmdLine = new CmdLine("cmdline2", [test_float2]);
-		cmdline2.parse(1, []);
+		cmdline2.parse([]);
 		
 		trace("***Error should not be thrown about string:");
 		var test_string2:CmdArgStr = new CmdArgStr(
@@ -217,9 +217,9 @@ class Main
 			"default"
 			);
 		var cmdline3:CmdLine = new CmdLine("cmdline2", [test_string2]);
-		cmdline3.parse(1, []);
+		cmdline3.parse([]);
 		trace("***Error should not be thrown about string:");
-		cmdline3.parse(1, ["-string"]);
+		cmdline3.parse(["-string"]);
 		
 		trace("***Error should be thrown about char:");
 		var test_char2:CmdArgChar = new CmdArgChar(
@@ -231,9 +231,9 @@ class Main
 			"d"
 			);
 		var cmdline3:CmdLine = new CmdLine("cmdline3", [test_char2]);
-		cmdline3.parse(1, ["-c"]);
+		cmdline3.parse(["-c"]);
 		trace("***Argument '-s' must be refused:");
-		cmdline3.parse(3, ["-c", "l", "-s"]);
+		cmdline3.parse(["-c", "l", "-s"]);
 		
 		//List flags
 		trace("***Error must be thrown for int:");
@@ -245,7 +245,7 @@ class Main
 			(E_CmdArgSyntax.isREQ | E_CmdArgSyntax.isVALOPT)
 			);
 		var cmdline4:CmdLine = new CmdLine("cmdline4", [test_list_int2]);
-		cmdline4.parse(1, ["-I"]);
+		cmdline4.parse(["-I"]);
 		
 		var test_list_float2:CmdArgFloatList = new CmdArgFloatList(
 			"F",
