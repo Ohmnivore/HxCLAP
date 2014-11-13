@@ -1,23 +1,6 @@
 package hxclap;
 
-import hxclap.CmdLine.ArgType;
-import hxclap.CmdArg.ArgError;
-import hxclap.CmdArg.E_CmdArgStatus;
-import hxclap.CmdArg.E_CmdArgSyntax;
-
-import hxclap.CmdArg.CmdArgBool;
-import hxclap.CmdArg.CmdArgInt;
-import hxclap.CmdArg.CmdArgFloat;
-import hxclap.CmdArg.CmdArgStr;
-import hxclap.CmdArg.CmdArgChar;
-
-import hxclap.CmdArg.CmdArgIntList;
-import hxclap.CmdArg.CmdArgFloatList;
-import hxclap.CmdArg.CmdArgStrList;
-import hxclap.CmdArg.CmdArgCharList;
-
-import hxclap.CmdTarget.CmdTargStr;
-import hxclap.CmdTarget.CmdTargStrList;
+import hxclap.arg.*;
 
 /**
  * ...

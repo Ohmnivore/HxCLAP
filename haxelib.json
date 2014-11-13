@@ -4,8 +4,8 @@
   "license": "MIT",
   "tags": ["parser", "command", "shell", "line", "argument"],
   "description": "Haxe port of CLAP, a C++ command line argument parser",
-  "version": "2.0.0",
-  "releasenote": "Haxified the API",
+  "version": "3.0.0",
+  "releasenote": "Moved each class to its own file",
   "contributors": ["Ohmnivore"],
   "dependencies": {}
 }

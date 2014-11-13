@@ -3,10 +3,11 @@ package ;
 import flash.display.StageAlign;
 import flash.display.StageScaleMode;
 import flash.Lib;
-import hxclap.CmdArg;
+
+import hxclap.arg.*;
 import hxclap.CmdLine;
-import hxclap.CmdTarget;
 import hxclap.CmdElem;
+import hxclap.E_CmdArgSyntax;
 
 /**
  * ...
