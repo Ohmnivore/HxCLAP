@@ -5,7 +5,7 @@ Haxe port of CLAP, a C++ command line argument parser:
 
 My goal with this port is to create a cross-platform solution that isn't exclusively destined for console programs. For example, it must be able to parse from an input string, not just from Sys.args(). I plan to use it for a HaxeFlixel game where I will implement a shell interface.
 
-For usage, the best thing would be to check out the docs at the CLAP website, the API is very similar.
+For usage, the best thing would be to check out the docs at the CLAP website, the API is very similar. However, note that this version got rid of delimiters, instead a space character is used as a delimiter. For example: test -s arg1 arg2 arg3 arg4 would be appropriately parsed by a CmdLine object using a CmdArgStrList.
 
 ### Quick examples:
     var test_bool:CmdArgBool = new CmdArgBool(
@@ -34,8 +34,9 @@ Check out src/Main.hx for examples.
 ### Examples of possible parsed inputs (pure gibberish btw):
 * rm readme license test.c -d
 * ping localhost -n 1000
-* mult -n 3.93, 3.56
+* mult -n 3.93 3.56
 * mail message.md message2.md message3.md message4.md -destination ohmnivore@canada.ca
+* cp file1 file2 file3 -d file_1 file_2 file_3 -k -j 4
 * heck, you get the idea
 
 ### TODO:
