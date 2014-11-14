@@ -23,47 +23,6 @@ class Main
 		stage.scaleMode = StageScaleMode.NO_SCALE;
 		stage.align = StageAlign.TOP_LEFT;
 		
-		var argarr2:Array<CmdElem> = [];
-		
-		var test_string2:CmdTargStr = new CmdTargStr(
-			"source",
-			"filename",
-			"tests CmdTargStr class",
-			(E_CmdArgSyntax.isOPT | E_CmdArgSyntax.isVALOPT),
-			"file"
-			);
-		argarr2.push(test_string2);
-		
-		var test_string_list2:CmdTargStrList = new CmdTargStrList(
-			"copies",
-			"filename",
-			"tests CmdTargStrList class",
-			(E_CmdArgSyntax.isREQ | E_CmdArgSyntax.isVALREQ),
-			1,
-			100
-			);
-		argarr2.push(test_string_list2);
-		
-		var test_bool2:CmdArgBool = new CmdArgBool(
-			"b",
-			"bool",
-			"tests CmdArgBool class",
-			(E_CmdArgSyntax.isREQ | E_CmdArgSyntax.isVALREQ)
-			);
-		argarr2.push(test_bool2);
-		
-		var testCmd2:CmdLine = new CmdLine("Test2", argarr2);
-		
-		var parseArr2:Array<String> = [
-			"samplefile.hx", "samplefile2.hx", "lolfile",
-			"-b"
-			];
-		
-		testCmd2.parse(parseArr2);
-		trace(test_string2.value);
-		trace(test_string_list2.list);
-		testCmd2.defaultTraceUsage();
-		
 		//--------------------------------------------------------------//
 		var argarr:Array<CmdElem> = [];
 		
@@ -153,13 +112,12 @@ class Main
 			"-float", "3.1416",
 			"-string", "Mmmmmmy generation...",
 			"-char", "C",
-			"-list-int", "2, 3, 4 , 5 , 6 , 7",
-			"-list-float", "11.34, 3.01245",
-			"-S", "Come, on, baby, light, my, fire", //same as -list-string
-			"-C", "H, E, L, L, O"  //same as -list-char
+			"-list-int", "2", "3", "4",
+			"-list-float", "11.34", "3.01245",
+			"-S", "Come", "on", "baby", "light", "my", "fire", //same as -list-string
+			"-C", "H", "E", "L", "L", "O"  //same as -list-char
 			];
 		testCmd.parse(parseArr);
-		trace("");
 		trace("***Done parsing, if no other previous messages were shown then all went smooth.");
 		trace("");
 		trace("***Now, parse results are shown for following args: " + parseArr);
@@ -169,14 +127,58 @@ class Main
 		trace(test_float, test_float.value);
 		trace(test_string, test_string.value);
 		trace(test_char, test_char.value);
-		trace(test_list_int, test_list_int._list);
-		trace(test_list_float, test_list_float._list);
-		trace(test_list_string, test_list_string._list);
-		trace(test_list_char, test_list_char._list);
+		trace(test_list_int, test_list_int.list);
+		trace(test_list_float, test_list_float.list);
+		trace(test_list_string, test_list_string.list);
+		trace(test_list_char, test_list_char.list);
 		
 		trace("");
-		trace("***Now tracing usage: ");
-		//testCmd.defaultTraceUsage();
+		
+		//--------------------------------------------------------------//
+		
+		trace("***Now CmdTargStr and CmdTargStrList test: ");
+		var argarr2:Array<CmdElem> = [];
+		
+		var test_string2:CmdTargStr = new CmdTargStr(
+			"source",
+			"filename",
+			"tests CmdTargStr class",
+			(E_CmdArgSyntax.isOPT | E_CmdArgSyntax.isVALOPT),
+			"file"
+			);
+		argarr2.push(test_string2);
+		
+		var test_string_list2:CmdTargStrList = new CmdTargStrList(
+			"copies",
+			"filename",
+			"tests CmdTargStrList class",
+			(E_CmdArgSyntax.isREQ | E_CmdArgSyntax.isVALREQ),
+			1,
+			100
+			);
+		argarr2.push(test_string_list2);
+		
+		var test_bool2:CmdArgBool = new CmdArgBool(
+			"b",
+			"bool",
+			"tests CmdArgBool class",
+			(E_CmdArgSyntax.isREQ | E_CmdArgSyntax.isVALREQ)
+			);
+		argarr2.push(test_bool2);
+		
+		var testCmd2:CmdLine = new CmdLine("Test2", argarr2);
+		
+		var parseArr2:Array<String> = [
+			"samplefile.hx", "samplefile2.hx", "lolfile",
+			"-b"
+			];
+		
+		testCmd2.parse(parseArr2);
+		trace(test_string2.value);
+		trace(test_string_list2.list);
+		trace(testCmd2.defaultTraceUsage());
+		trace("");
+		
 		//--------------------------------------------------------------//
 		
 		trace("***Warning should be thrown about bool:");
